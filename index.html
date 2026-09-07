@@ -1,1815 +1,388 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uz">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Шахматы — игра онлайн</title>
-
+<title>Kodni Top</title>
 <style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #39d353;
+    --accent-dim: #1f6f38;
+    --warn: #d29922;
+    --danger: #f85149;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
     margin: 0;
-    background: rgb(48, 46, 43);
-    color: rgb(245, 245, 242);
-    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
     min-height: 100vh;
-}
-
-/* ================= HEADER ================= */
-
-.header {
-    width: 100%;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: rgb(48, 46, 43);
-}
-
-.logo {
-    position: absolute;
-    right: 35px;
+  }
+  .wrap { width: 100%; max-width: 480px; }
+  header { text-align: center; margin-bottom: 20px; }
+  header h1 {
     font-size: 22px;
-    font-weight: bold;
-    color: rgb(245, 245, 242);
-}
+    margin: 0 0 6px;
+    letter-spacing: 0.5px;
+  }
+  header h1 .cursor {
+    display: inline-block;
+    width: 10px; height: 20px;
+    background: var(--accent);
+    margin-left: 6px;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  header p { color: var(--muted); font-size: 13px; margin: 0; }
 
-.logo span {
-    color: rgb(129, 182, 76);
-}
+  .rules {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.6;
+  }
+  .rules b { color: var(--text); }
 
-/* ================= GAME ================= */
-
-.game {
-    width: 100%;
-    max-width: 1100px;
-    margin: 20px auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 25px;
-}
-
-/* Board 100px chaproq */
-
-.board-area {
-    position: relative;
-    left: -100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.turn {
-    background: rgb(38, 36, 33);
-    padding: 9px 18px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-/* ================= BOARD ================= */
-
-#board {
-    width: 480px;
-    height: 480px;
-
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-
-    border: 4px solid rgb(25, 24, 22);
-    border-radius: 5px;
-
-    overflow: hidden;
-
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.square {
-    width: 60px;
-    height: 60px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    position: relative;
-
-    cursor: pointer;
-    user-select: none;
-}
-
-.light {
-    background: rgb(235, 236, 208);
-}
-
-.dark {
-    background: rgb(119, 149, 86);
-}
-
-/* ================= PIECES ================= */
-
-/*
-   Oq va qora figuralar oddiy ko'rinishda.
-*/
-
-.piece {
-    font-family: "Times New Roman", serif;
-    font-size: 46px;
-    line-height: 1;
-    position: relative;
-    z-index: 3;
-}
-
-/* oq */
-
-.white-piece {
-    color: rgb(255, 255, 255);
-
-    text-shadow:
-        1px 1px 0 rgb(0,0,0),
-        -1px -1px 0 rgb(0,0,0),
-        1px -1px 0 rgb(0,0,0),
-        -1px 1px 0 rgb(0,0,0);
-}
-
-/* qora */
-
-.black-piece {
-    color: rgb(0, 0, 0);
-}
-
-/* ================= MOVES ================= */
-
-.selected {
-    box-shadow: inset 0 0 0 4px rgb(246, 246, 105);
-}
-
-.last {
-    background-image:
-        linear-gradient(
-            rgba(246,246,105,0.45),
-            rgba(246,246,105,0.45)
-        );
-}
-
-.dot {
-    width: 18px;
-    height: 18px;
-
-    border-radius: 50%;
-
-    background: rgba(0,0,0,0.25);
-
-    position: absolute;
-    z-index: 2;
-}
-
-.capture {
-    width: 48px;
-    height: 48px;
-
-    border-radius: 50%;
-
-    border: 4px solid rgba(220,50,50,0.55);
-
-    position: absolute;
-    z-index: 2;
-}
-
-/* ================= SIDE PANEL ================= */
-
-.panel {
-    width: 270px;
-    min-height: 480px;
-
-    background: rgb(38,36,33);
-
-    border-radius: 10px;
-
-    padding: 18px;
-
+  .board {
     display: flex;
     flex-direction: column;
-
-    gap: 15px;
-}
-
-.info {
-    background: rgb(31,30,28);
-    border-radius: 7px;
-    padding: 12px;
-}
-
-.info-title {
-    font-size: 11px;
-    color: rgb(181,179,174);
-    margin-bottom: 5px;
-    text-transform: uppercase;
-}
-
-#capturedWhite,
-#capturedBlack {
-    min-height: 30px;
-    font-size: 24px;
-}
-
-/* ================= STATUS ================= */
-
-.status {
-    background: rgb(31,30,28);
-    padding: 12px;
-
-    border-radius: 7px;
-
-    font-size: 14px;
-}
-
-/* ================= HISTORY ================= */
-
-.history {
-    background: rgb(31,30,28);
-
-    padding: 12px;
-
-    border-radius: 7px;
-
-    height: 170px;
-
-    overflow-y: auto;
-
-    font-size: 13px;
-}
-
-.history-title {
-    color: rgb(181,179,174);
-    font-size: 11px;
-    margin-bottom: 7px;
-}
-
-#history {
-    padding-left: 20px;
-    margin: 0;
-}
-
-/* ================= BUTTON ================= */
-
-button {
-    border: none;
-
-    cursor: pointer;
-
-    font-family: Arial, sans-serif;
-}
-
-.main-button {
-    width: 100%;
-
-    padding: 12px;
-
-    border-radius: 7px;
-
-    background: rgb(129,182,76);
-
-    color: rgb(20,20,20);
-
-    font-size: 14px;
-
-    font-weight: bold;
-}
-
-.main-button:hover {
-    background: rgb(150,200,90);
-}
-
-.secondary-button {
-    width: 100%;
-
-    padding: 12px;
-
-    border-radius: 7px;
-
-    background: rgb(58,56,53);
-
-    color: rgb(245,245,242);
-
-    font-size: 14px;
-
-    font-weight: bold;
-}
-
-.secondary-button:hover {
-    background: rgb(75,73,70);
-}
-
-/* ================= MODAL ================= */
-
-.modal {
-    position: fixed;
-
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-
-    background: rgba(0,0,0,0.7);
-
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .row {
     display: flex;
-
     align-items: center;
-    justify-content: center;
-
-    z-index: 100;
-}
-
-.modal.hidden {
-    display: none;
-}
-
-.menu {
-    width: 360px;
-
-    background: rgb(38,36,33);
-
-    border-radius: 12px;
-
-    padding: 25px;
-
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-
-.menu h2 {
-    margin-top: 0;
-    margin-bottom: 5px;
-}
-
-.menu p {
-    color: rgb(181,179,174);
-    font-size: 13px;
-}
-
-/* ================= MODE BUTTONS ================= */
-
-.mode-buttons {
-    display: flex;
-
     gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .row .idx { color: var(--muted); font-size: 11px; width: 18px; }
+  .pegs { display: flex; gap: 6px; flex: 1; }
+  .peg {
+    width: 34px; height: 34px;
+    border-radius: 6px;
+    background: #21262d;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: bold;
+    color: var(--text);
+  }
+  .feedback { display: flex; gap: 4px; align-items: center; min-width: 70px; justify-content: flex-end; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.exact { background: var(--accent); }
+  .dot.partial { background: var(--warn); }
+  .dot.none { background: #30363d; }
 
-    margin-top: 15px;
-}
+  .input-area {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .digits { display: flex; gap: 8px; margin-bottom: 12px; justify-content: center; }
+  .digit-slot {
+    width: 44px; height: 44px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: bold;
+    background: #0d1117;
+    transition: border-color 0.15s;
+  }
+  .digit-slot.filled { border-color: var(--accent-dim); color: var(--accent); }
 
-.mode-button {
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .key {
+    padding: 10px 0;
+    background: #21262d;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .key:hover { background: #2d333b; }
+  .key:active { transform: scale(0.95); }
+  .key:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .actions { display: flex; gap: 8px; }
+  .btn {
     flex: 1;
-
-    padding: 12px;
-
-    background: rgb(31,30,28);
-
-    color: rgb(245,245,242);
-
-    border: 2px solid rgb(58,56,53);
-
-    border-radius: 8px;
-
+    padding: 11px 0;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 13px;
+    cursor: pointer;
+    background: #21262d;
+    color: var(--text);
+  }
+  .btn.primary {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: #dcffe4;
     font-weight: bold;
-}
+  }
+  .btn.primary:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn:hover:not(:disabled) { filter: brightness(1.15); }
 
-.mode-button.active {
-    border-color: rgb(129,182,76);
+  .status {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 18px;
+  }
+  .status.win { color: var(--accent); font-weight: bold; }
+  .status.lose { color: var(--danger); font-weight: bold; }
 
-    color: rgb(129,182,76);
-
-    background: rgba(129,182,76,0.12);
-}
-
-/* ================= LEVEL ================= */
-
-.levels {
-    margin-top: 18px;
-}
-
-.level-button {
+  .newgame {
+    display: none;
     width: 100%;
-
-    padding: 12px;
-
-    margin-top: 8px;
-
-    text-align: left;
-
-    background: rgb(31,30,28);
-
-    color: rgb(245,245,242);
-
-    border: 2px solid rgb(58,56,53);
-
-    border-radius: 8px;
-}
-
-.level-button.active {
-    border-color: rgb(129,182,76);
-}
-
-.level-button strong {
-    display: block;
-}
-
-.level-button small {
-    color: rgb(181,179,174);
-}
-
-.menu-start {
-    margin-top: 20px;
-}
-
-/* ================= MOBILE ================= */
-
-@media(max-width: 800px) {
-
-    .game {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .board-area {
-        left: 0;
-    }
-
-    .panel {
-        width: 480px;
-        max-width: 90vw;
-    }
-
-    #board {
-        width: min(90vw, 480px);
-        height: min(90vw, 480px);
-    }
-
-    .square {
-        width: auto;
-        height: auto;
-    }
-
-    .logo {
-        position: static;
-    }
-}
-
+    margin-top: 12px;
+    padding: 12px 0;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-weight: bold;
+    cursor: pointer;
+  }
 </style>
 </head>
-
 <body>
+<div class="wrap">
+  <header>
+    <h1>KODNI_TOP<span class="cursor"></span></h1>
+    <p>4 xonali maxfiy kodni toping</p>
+  </header>
 
-<!-- ================= HEADER ================= -->
+  <div class="rules">
+    Men 4 xonali (0–9, takrorlanmaydigan) maxfiy kod o'yladim.
+    Har urinishdan keyin: <b style="color:var(--accent)">●</b> yashil = to'g'ri raqam, to'g'ri joyda.
+    <b style="color:var(--warn)">●</b> sariq = raqam bor, lekin joyi noto'g'ri.
+    Sizda <b>8 ta</b> urinish bor.
+  </div>
 
-<header class="header">
+  <div class="board" id="board"></div>
 
-    <div class="logo">
-        ШАХМАТЫ<span>.</span>
+  <div class="input-area">
+    <div class="digits" id="digits">
+      <div class="digit-slot" data-i="0"></div>
+      <div class="digit-slot" data-i="1"></div>
+      <div class="digit-slot" data-i="2"></div>
+      <div class="digit-slot" data-i="3"></div>
     </div>
-
-</header>
-
-
-<!-- ================= GAME ================= -->
-
-<div class="game">
-
-    <div class="board-area">
-
-        <div class="turn" id="turn">
-            ⚪ Ход белых
-        </div>
-
-        <div id="board"></div>
-
+    <div class="keypad" id="keypad"></div>
+    <div class="actions">
+      <button class="btn" id="clearBtn">Tozalash</button>
+      <button class="btn primary" id="submitBtn" disabled>Tekshirish</button>
     </div>
-
-
-    <div class="panel">
-
-        <div class="info">
-
-            <div class="info-title">
-                Белые забрали
-            </div>
-
-            <div id="capturedWhite"></div>
-
-        </div>
-
-
-        <div class="info">
-
-            <div class="info-title">
-                Чёрные забрали
-            </div>
-
-            <div id="capturedBlack"></div>
-
-        </div>
-
-
-        <div class="status" id="status">
-            Игра началась.
-        </div>
-
-
-        <div class="history">
-
-            <div class="history-title">
-                ИСТОРИЯ ХОДОВ
-            </div>
-
-            <ol id="history"></ol>
-
-        </div>
-
-
-        <button
-            class="main-button"
-            id="newGame">
-            Новая игра
-        </button>
-
-
-        <button
-            class="secondary-button"
-            id="settings">
-            Настройки
-        </button>
-
-    </div>
-
+    <div class="status" id="status">Kod kiriting...</div>
+    <button class="newgame" id="newGameBtn">Yangi o'yin ↻</button>
+  </div>
 </div>
-
-
-<!-- ================= MENU ================= -->
-
-<div class="modal" id="modal">
-
-    <div class="menu">
-
-        <h2>
-            Настройки игры
-        </h2>
-
-        <p>
-            Выберите режим игры
-        </p>
-
-
-        <div class="mode-buttons">
-
-            <button
-                class="mode-button active"
-                id="pvp">
-                1 против 1
-            </button>
-
-            <button
-                class="mode-button"
-                id="bot">
-                Против бота
-            </button>
-
-        </div>
-
-
-        <div class="levels" id="levels">
-
-            <b>
-                Уровень бота
-            </b>
-
-            <button
-                class="level-button"
-                data-level="1">
-
-                <strong>
-                    Лёгкий ★☆☆
-                </strong>
-
-                <small>
-                    Бот ходит случайно
-                </small>
-
-            </button>
-
-
-            <button
-                class="level-button active"
-                data-level="2">
-
-                <strong>
-                    Средний ★★☆
-                </strong>
-
-                <small>
-                    Бот думает на один ход
-                </small>
-
-            </button>
-
-
-            <button
-                class="level-button"
-                data-level="3">
-
-                <strong>
-                    Сложный ★★★
-                </strong>
-
-                <small>
-                    Бот думает глубже
-                </small>
-
-            </button>
-
-        </div>
-
-
-        <button
-            class="main-button menu-start"
-            id="startGame">
-
-            Начать игру
-
-        </button>
-
-    </div>
-
-</div>
-
 
 <script>
+(function() {
+  const MAX_TRIES = 8;
+  let secret = [];
+  let current = [];
+  let tries = 0;
+  let gameOver = false;
 
-/* =====================================================
-   ШАХМАТЫ
-===================================================== */
+  const boardEl = document.getElementById('board');
+  const digitsEl = document.getElementById('digits');
+  const keypadEl = document.getElementById('keypad');
+  const submitBtn = document.getElementById('submitBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const statusEl = document.getElementById('status');
+  const newGameBtn = document.getElementById('newGameBtn');
 
-const pieces = {
-
-    white: {
-        K: "♔",
-        Q: "♕",
-        R: "♖",
-        B: "♗",
-        N: "♘",
-        P: "♙"
-    },
-
-    black: {
-        K: "♚",
-        Q: "♛",
-        R: "♜",
-        B: "♝",
-        N: "♞",
-        P: "♟"
+  function generateSecret() {
+    const digits = [0,1,2,3,4,5,6,7,8,9];
+    for (let i = digits.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [digits[i], digits[j]] = [digits[j], digits[i]];
     }
+    return digits.slice(0, 4);
+  }
 
-};
-
-
-const values = {
-
-    P: 100,
-    N: 320,
-    B: 330,
-    R: 500,
-    Q: 900,
-    K: 20000
-
-};
-
-
-let board = [];
-
-let turn = "w";
-
-let selected = null;
-
-let possibleMoves = [];
-
-let lastMove = null;
-
-let gameOver = false;
-
-let mode = "pvp";
-
-let botLevel = 2;
-
-let capturedWhite = [];
-
-let capturedBlack = [];
-
-let movesHistory = [];
-
-
-/* =====================================================
-   СОЗДАНИЕ ДОСКИ
-===================================================== */
-
-function createBoard() {
-
-    board = Array.from(
-        { length: 8 },
-        () => Array(8).fill(null)
-    );
-
-    const back = [
-        "R",
-        "N",
-        "B",
-        "Q",
-        "K",
-        "B",
-        "N",
-        "R"
-    ];
-
-
-    for(let c = 0; c < 8; c++) {
-
-        board[0][c] = {
-            type: back[c],
-            color: "b"
-        };
-
-        board[1][c] = {
-            type: "P",
-            color: "b"
-        };
-
-        board[6][c] = {
-            type: "P",
-            color: "w"
-        };
-
-        board[7][c] = {
-            type: back[c],
-            color: "w"
-        };
-
+  function buildKeypad() {
+    keypadEl.innerHTML = '';
+    for (let d = 0; d <= 9; d++) {
+      const btn = document.createElement('button');
+      btn.className = 'key';
+      btn.textContent = d;
+      btn.dataset.digit = d;
+      btn.addEventListener('click', () => onKeyPress(d));
+      keypadEl.appendChild(btn);
     }
+  }
 
-}
-
-
-/* =====================================================
-   ПОКАЗ ДОСКИ
-===================================================== */
-
-function renderBoard() {
-
-    const boardElement =
-        document.getElementById("board");
-
-    boardElement.innerHTML = "";
-
-
-    for(let r = 0; r < 8; r++) {
-
-        for(let c = 0; c < 8; c++) {
-
-            const square =
-                document.createElement("div");
-
-            square.className =
-                "square " +
-                ((r + c) % 2 === 0
-                    ? "light"
-                    : "dark");
-
-
-            if(
-                lastMove &&
-                (
-                    (
-                        lastMove.from.r === r &&
-                        lastMove.from.c === c
-                    )
-                    ||
-                    (
-                        lastMove.to.r === r &&
-                        lastMove.to.c === c
-                    )
-                )
-            ) {
-
-                square.classList.add("last");
-
-            }
-
-
-            if(
-                selected &&
-                selected.r === r &&
-                selected.c === c
-            ) {
-
-                square.classList.add("selected");
-
-            }
-
-
-            const move =
-                possibleMoves.find(
-                    m =>
-                    m.r === r &&
-                    m.c === c
-                );
-
-
-            if(move) {
-
-                if(board[r][c]) {
-
-                    const ring =
-                        document.createElement("div");
-
-                    ring.className = "capture";
-
-                    square.appendChild(ring);
-
-                } else {
-
-                    const dot =
-                        document.createElement("div");
-
-                    dot.className = "dot";
-
-                    square.appendChild(dot);
-
-                }
-
-            }
-
-
-            const piece = board[r][c];
-
-
-            if(piece) {
-
-                const element =
-                    document.createElement("span");
-
-                element.className =
-                    "piece " +
-                    (
-                        piece.color === "w"
-                        ? "white-piece"
-                        : "black-piece"
-                    );
-
-                element.textContent =
-                    piece.color === "w"
-                    ? pieces.white[piece.type]
-                    : pieces.black[piece.type];
-
-                square.appendChild(element);
-
-            }
-
-
-            square.addEventListener(
-                "click",
-                function() {
-
-                    clickSquare(r,c);
-
-                }
-            );
-
-
-            boardElement.appendChild(square);
-
-        }
-
+  function onKeyPress(d) {
+    if (gameOver || current.length >= 4) return;
+    if (current.includes(d)) {
+      flashStatus('Har raqam faqat bir marta ishlatilishi kerak!', false);
+      return;
     }
-
-
-    document.getElementById("turn").textContent =
-        turn === "w"
-        ? "⚪ Ход белых"
-        : "⚫ Ход чёрных";
-
-
-    document.getElementById(
-        "capturedWhite"
-    ).textContent =
-        capturedWhite.join(" ");
-
-
-    document.getElementById(
-        "capturedBlack"
-    ).textContent =
-        capturedBlack.join(" ");
-
-
-    renderHistory();
-
-}
-
-
-/* =====================================================
-   ПОЛУЧЕНИЕ ХОДОВ
-===================================================== */
-
-function getMoves(r,c) {
-
-    const piece = board[r][c];
-
-    if(!piece) return [];
-
-
-    const moves = [];
-
-    const direction =
-        piece.color === "w"
-        ? -1
-        : 1;
-
-
-    function add(nr,nc) {
-
-        if(
-            nr < 0 ||
-            nr > 7 ||
-            nc < 0 ||
-            nc > 7
-        ) return;
-
-
-        if(
-            board[nr][nc] &&
-            board[nr][nc].color === piece.color
-        ) return;
-
-
-        moves.push({
-            r:nr,
-            c:nc
-        });
-
-    }
-
-
-    if(piece.type === "P") {
-
-        if(
-            r + direction >= 0 &&
-            r + direction <= 7 &&
-            !board[r + direction][c]
-        ) {
-
-            moves.push({
-                r:r + direction,
-                c:c
-            });
-
-
-            const start =
-                piece.color === "w"
-                ? 6
-                : 1;
-
-
-            if(
-                r === start &&
-                !board[r + direction * 2][c]
-            ) {
-
-                moves.push({
-                    r:r + direction * 2,
-                    c:c
-                });
-
-            }
-
-        }
-
-
-        for(
-            const dc of [-1,1]
-        ) {
-
-            const nr = r + direction;
-            const nc = c + dc;
-
-
-            if(
-                nr >= 0 &&
-                nr <= 7 &&
-                nc >= 0 &&
-                nc <= 7 &&
-                board[nr][nc] &&
-                board[nr][nc].color !== piece.color
-            ) {
-
-                moves.push({
-                    r:nr,
-                    c:nc
-                });
-
-            }
-
-        }
-
-    }
-
-
-    else if(piece.type === "N") {
-
-        const jumps = [
-
-            [-2,-1],
-            [-2,1],
-            [-1,-2],
-            [-1,2],
-            [1,-2],
-            [1,2],
-            [2,-1],
-            [2,1]
-
-        ];
-
-
-        jumps.forEach(
-            ([dr,dc]) =>
-            add(r + dr,c + dc)
-        );
-
-    }
-
-
-    else if(piece.type === "K") {
-
-        for(let dr=-1; dr<=1; dr++) {
-
-            for(let dc=-1; dc<=1; dc++) {
-
-                if(dr !== 0 || dc !== 0) {
-
-                    add(
-                        r + dr,
-                        c + dc
-                    );
-
-                }
-
-            }
-
-        }
-
-    }
-
-
-    else {
-
-        let directions = [];
-
-
-        if(piece.type === "R") {
-
-            directions = [
-                [-1,0],
-                [1,0],
-                [0,-1],
-                [0,1]
-            ];
-
-        }
-
-
-        if(piece.type === "B") {
-
-            directions = [
-                [-1,-1],
-                [-1,1],
-                [1,-1],
-                [1,1]
-            ];
-
-        }
-
-
-        if(piece.type === "Q") {
-
-            directions = [
-
-                [-1,0],
-                [1,0],
-                [0,-1],
-                [0,1],
-
-                [-1,-1],
-                [-1,1],
-                [1,-1],
-                [1,1]
-
-            ];
-
-        }
-
-
-        directions.forEach(
-            ([dr,dc]) => {
-
-                let nr = r + dr;
-                let nc = c + dc;
-
-
-                while(
-                    nr >= 0 &&
-                    nr <= 7 &&
-                    nc >= 0 &&
-                    nc <= 7
-                ) {
-
-                    if(board[nr][nc]) {
-
-                        if(
-                            board[nr][nc].color !==
-                            piece.color
-                        ) {
-
-                            moves.push({
-                                r:nr,
-                                c:nc
-                            });
-
-                        }
-
-                        break;
-
-                    }
-
-
-                    moves.push({
-                        r:nr,
-                        c:nc
-                    });
-
-
-                    nr += dr;
-                    nc += dc;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    return moves;
-
-}
-
-
-/* =====================================================
-   ХОД ИГРОКА
-===================================================== */
-
-function clickSquare(r,c) {
-
-    if(gameOver) return;
-
-
-    if(
-        mode === "bot" &&
-        turn === "b"
-    ) {
-
-        return;
-
-    }
-
-
-    const piece = board[r][c];
-
-
-    if(selected) {
-
-        const move =
-            possibleMoves.find(
-                m =>
-                m.r === r &&
-                m.c === c
-            );
-
-
-        if(move) {
-
-            makeMove(
-                selected,
-                move
-            );
-
-            selected = null;
-
-            possibleMoves = [];
-
-            renderBoard();
-
-            if(
-                mode === "bot" &&
-                turn === "b" &&
-                !gameOver
-            ) {
-
-                setTimeout(
-                    botMove,
-                    500
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        if(
-            piece &&
-            piece.color === turn
-        ) {
-
-            selected = {
-                r:r,
-                c:c
-            };
-
-            possibleMoves =
-                getMoves(r,c);
-
-            renderBoard();
-
-            return;
-
-        }
-
-
-        selected = null;
-
-        possibleMoves = [];
-
-        renderBoard();
-
-        return;
-
-    }
-
-
-    if(
-        piece &&
-        piece.color === turn
-    ) {
-
-        selected = {
-            r:r,
-            c:c
-        };
-
-        possibleMoves =
-            getMoves(r,c);
-
-        renderBoard();
-
-    }
-
-}
-
-
-/* =====================================================
-   СДЕЛАТЬ ХОД
-===================================================== */
-
-function makeMove(from,to) {
-
-    const piece =
-        board[from.r][from.c];
-
-    const captured =
-        board[to.r][to.c];
-
-
-    if(captured) {
-
-        if(piece.color === "w") {
-
-            capturedWhite.push(
-                pieces.black[captured.type]
-            );
-
-        } else {
-
-            capturedBlack.push(
-                pieces.white[captured.type]
-            );
-
-        }
-
-    }
-
-
-    board[to.r][to.c] = piece;
-
-    board[from.r][from.c] = null;
-
-
-    /* превращение пешки */
-
-    if(
-        piece.type === "P" &&
-        (
-            to.r === 0 ||
-            to.r === 7
-        )
-    ) {
-
-        board[to.r][to.c] = {
-
-            type:"Q",
-
-            color:piece.color
-
-        };
-
-    }
-
-
-    lastMove = {
-
-        from: {
-            r:from.r,
-            c:from.c
-        },
-
-        to: {
-            r:to.r,
-            c:to.c
-        }
-
-    };
-
-
-    movesHistory.push({
-
-        from:
-            String.fromCharCode(
-                97 + from.c
-            ) +
-            (8-from.r),
-
-        to:
-            String.fromCharCode(
-                97 + to.c
-            ) +
-            (8-to.r)
-
+    current.push(d);
+    renderDigits();
+    submitBtn.disabled = current.length !== 4;
+    if (current.length === 4) statusEl.textContent = "Tayyor — 'Tekshirish' tugmasini bosing";
+  }
+
+  function renderDigits() {
+    const slots = digitsEl.querySelectorAll('.digit-slot');
+    slots.forEach((slot, i) => {
+      if (current[i] !== undefined) {
+        slot.textContent = current[i];
+        slot.classList.add('filled');
+      } else {
+        slot.textContent = '';
+        slot.classList.remove('filled');
+      }
     });
+  }
 
+  function flashStatus(msg, ok) {
+    statusEl.textContent = msg;
+    statusEl.style.color = ok ? '' : 'var(--danger)';
+    setTimeout(() => { statusEl.style.color = ''; }, 900);
+  }
 
-    turn =
-        turn === "w"
-        ? "b"
-        : "w";
+  function evaluate(guess) {
+    let exact = 0, partial = 0;
+    guess.forEach((d, i) => {
+      if (d === secret[i]) exact++;
+      else if (secret.includes(d)) partial++;
+    });
+    return { exact, partial };
+  }
 
+  function addRow(guess, result, idx) {
+    const row = document.createElement('div');
+    row.className = 'row';
 
-    checkGame();
+    const idxEl = document.createElement('div');
+    idxEl.className = 'idx';
+    idxEl.textContent = '#' + idx;
+    row.appendChild(idxEl);
 
-}
+    const pegsEl = document.createElement('div');
+    pegsEl.className = 'pegs';
+    guess.forEach(d => {
+      const peg = document.createElement('div');
+      peg.className = 'peg';
+      peg.textContent = d;
+      pegsEl.appendChild(peg);
+    });
+    row.appendChild(pegsEl);
 
+    const fbEl = document.createElement('div');
+    fbEl.className = 'feedback';
+    for (let i = 0; i < result.exact; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot exact';
+      fbEl.appendChild(dot);
+    }
+    for (let i = 0; i < result.partial; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot partial';
+      fbEl.appendChild(dot);
+    }
+    row.appendChild(fbEl);
 
-/* =====================================================
-   ПРОВЕРКА ИГРЫ
-===================================================== */
+    boardEl.prepend(row);
+  }
 
-function checkGame() {
+  function submitGuess() {
+    if (current.length !== 4 || gameOver) return;
+    tries++;
+    const result = evaluate(current);
+    addRow(current, result, tries);
 
-    const kingExists =
-        board.some(
-            row =>
-            row.some(
-                p =>
-                p &&
-                p.type === "K" &&
-                p.color === turn
-            )
-        );
-
-
-    if(!kingExists) {
-
-        gameOver = true;
-
-        document.getElementById(
-            "status"
-        ).textContent =
-            turn === "w"
-            ? "Чёрные победили! 🎉"
-            : "Белые победили! 🎉";
-
-        return;
-
+    if (result.exact === 4) {
+      gameOver = true;
+      statusEl.textContent = `🎉 Tabriklaymiz! ${tries} urinishda topdingiz!`;
+      statusEl.className = 'status win';
+      endGame();
+    } else if (tries >= MAX_TRIES) {
+      gameOver = true;
+      statusEl.textContent = `😔 Urinishlar tugadi. Kod: ${secret.join('')}`;
+      statusEl.className = 'status lose';
+      endGame();
+    } else {
+      statusEl.textContent = `Urinish ${tries}/${MAX_TRIES}. Yana urinib ko'ring.`;
+      statusEl.className = 'status';
     }
 
-
-    document.getElementById(
-        "status"
-    ).textContent =
-        turn === "w"
-        ? "Ход белых."
-        : "Ход чёрных.";
-
-}
-
-
-/* =====================================================
-   ИСТОРИЯ
-===================================================== */
-
-function renderHistory() {
-
-    const list =
-        document.getElementById(
-            "history"
-        );
-
-    list.innerHTML = "";
-
-
-    for(
-        let i=0;
-        i<movesHistory.length;
-        i+=2
-    ) {
-
-        const li =
-            document.createElement("li");
-
-
-        let text =
-            movesHistory[i].from +
-            " → " +
-            movesHistory[i].to;
-
-
-        if(movesHistory[i+1]) {
-
-            text +=
-                "    " +
-                movesHistory[i+1].from +
-                " → " +
-                movesHistory[i+1].to;
-
-        }
-
-
-        li.textContent = text;
-
-        list.appendChild(li);
-
-    }
-
-}
-
-
-/* =====================================================
-   БОТ
-===================================================== */
-
-function botMove() {
-
-    if(
-        gameOver ||
-        mode !== "bot" ||
-        turn !== "b"
-    ) {
-
-        return;
-
-    }
-
-
-    const allMoves = [];
-
-
-    for(let r=0;r<8;r++) {
-
-        for(let c=0;c<8;c++) {
-
-            const piece = board[r][c];
-
-
-            if(
-                piece &&
-                piece.color === "b"
-            ) {
-
-                const moves =
-                    getMoves(r,c);
-
-
-                moves.forEach(
-                    move => {
-
-                        allMoves.push({
-
-                            from:{
-                                r:r,
-                                c:c
-                            },
-
-                            to:move
-
-                        });
-
-                    }
-                );
-
-            }
-
-        }
-
-    }
-
-
-    if(allMoves.length === 0) {
-
-        gameOver = true;
-
-        document.getElementById(
-            "status"
-        ).textContent =
-            "Белые победили! 🎉";
-
-        return;
-
-    }
-
-
-    let move;
-
-
-    if(botLevel === 1) {
-
-        move =
-            allMoves[
-                Math.floor(
-                    Math.random() *
-                    allMoves.length
-                )
-            ];
-
-    }
-
-
-    else {
-
-        const captures =
-            allMoves.filter(
-                m =>
-                board[m.to.r][m.to.c]
-            );
-
-
-        if(
-            captures.length &&
-            Math.random() > 0.3
-        ) {
-
-            move =
-                captures[
-                    Math.floor(
-                        Math.random() *
-                        captures.length
-                    )
-                ];
-
-        } else {
-
-            move =
-                allMoves[
-                    Math.floor(
-                        Math.random() *
-                        allMoves.length
-                    )
-                ];
-
-        }
-
-    }
-
-
-    makeMove(
-        move.from,
-        move.to
-    );
-
-
-    renderBoard();
-
-}
-
-
-
-
-function newGame() {
-
-    turn = "w";
-
-    selected = null;
-
-    possibleMoves = [];
-
-    lastMove = null;
-
+    current = [];
+    renderDigits();
+    submitBtn.disabled = true;
+  }
+
+  function endGame() {
+    keypadEl.querySelectorAll('.key').forEach(k => k.disabled = true);
+    submitBtn.disabled = true;
+    clearBtn.disabled = true;
+    newGameBtn.style.display = 'block';
+  }
+
+  function startGame() {
+    secret = generateSecret();
+    current = [];
+    tries = 0;
     gameOver = false;
-
-    capturedWhite = [];
-
-    capturedBlack = [];
-
-    movesHistory = [];
-
-    createBoard();
-
-    document.getElementById(
-        "status"
-    ).textContent =
-        mode === "bot"
-        ? "Игра началась. Удачи!"
-        : "Игра началась.";
-
-    renderBoard();
-
-}
-
-
-
-
-const modal =
-    document.getElementById(
-        "modal"
-    );
-
-
-const pvp =
-    document.getElementById(
-        "pvp"
-    );
-
-
-const bot =
-    document.getElementById(
-        "bot"
-    );
-
-
-const levels =
-    document.getElementById(
-        "levels"
-    );
-
-
-const levelButtons =
-    document.querySelectorAll(
-        ".level-button"
-    );
-
-
-
-pvp.addEventListener(
-    "click",
-    function() {
-
-        mode = "pvp";
-
-        pvp.classList.add("active");
-
-        bot.classList.remove("active");
-
-        levels.style.display = "none";
-
-    }
-);
-
-
-
-bot.addEventListener(
-    "click",
-    function() {
-
-        mode = "bot";
-
-        bot.classList.add("active");
-
-        pvp.classList.remove("active");
-
-        levels.style.display = "block";
-
-    }
-);
-
-
-
-levelButtons.forEach(
-    function(button) {
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                levelButtons.forEach(
-                    b =>
-                    b.classList.remove(
-                        "active"
-                    )
-                );
-
-
-                button.classList.add(
-                    "active"
-                );
-
-
-                botLevel =
-                    Number(
-                        button.dataset.level
-                    );
-
-            }
-        );
-
-    }
-);
-
-
-
-document.getElementById(
-    "startGame"
-).addEventListener(
-    "click",
-    function() {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-        newGame();
-
-    }
-);
-
-
-
-document.getElementById(
-    "newGame"
-).addEventListener(
-    "click",
-    function() {
-
-        newGame();
-
-    }
-);
-
-
-
-document.getElementById(
-    "settings"
-).addEventListener(
-    "click",
-    function() {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-);
-
-
-
-
-levels.style.display = "none";
-
-createBoard();
-
-renderBoard();
-
+    boardEl.innerHTML = '';
+    renderDigits();
+    submitBtn.disabled = true;
+    clearBtn.disabled = false;
+    statusEl.textContent = 'Kod kiriting...';
+    statusEl.className = 'status';
+    newGameBtn.style.display = 'none';
+    buildKeypad();
+    console.log('(dev) maxfiy kod:', secret.join(''));
+  }
+
+  clearBtn.addEventListener('click', () => {
+    if (gameOver) return;
+    current = [];
+    renderDigits();
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Kod kiriting...';
+  });
+
+  submitBtn.addEventListener('click', submitGuess);
+  newGameBtn.addEventListener('click', startGame);
+
+  startGame();
+})();
 </script>
-
 </body>
 </html>
